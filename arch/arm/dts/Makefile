@@ -216,6 +216,7 @@ dtb-$(CONFIG_ARCH_TEGRA) += \
 	tegra20-qemu.dtb \
 	tegra30-apalis.dtb \
 	tegra30-asus-tf201.dtb \
+	tegra30-asus-tf300t.dtb \
 	tegra30-beaver.dtb \
 	tegra30-cardhu.dtb \
 	tegra30-colibri.dtb \
