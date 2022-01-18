@@ -1,0 +1,12 @@
+TRANSFORMER BOARD
+M:	Svyatoslav Ryhel <clamor95@gmail.com>
+S:	Maintained
+F:	board/asus/transformer-t30/
+F:	include/configs/transformer-t30.h
+F:	configs/tf201_defconfig
+F:	configs/tf300t_defconfig
+F:	configs/tf300tg_defconfig
+F:	configs/tf300tl_defconfig
+F:	configs/tf600t_defconfig
+F:	configs/tf700t_defconfig
+F:	configs/p1801-t_defconfig
