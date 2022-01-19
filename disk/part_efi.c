@@ -322,8 +322,28 @@ static int part_test_efi(struct blk_desc *dev_desc)
 	/* Read legacy MBR from block 0 and validate it */
 	if ((blk_dread(dev_desc, 0, 1, (ulong *)legacymbr) != 1)
 		|| (is_pmbr_valid(legacymbr) != 1)) {
+		goto backup;
+	}
+
+	return 0;
+
+backup:;
+	/*
+	 * If MBR/Primary GPT is not valid, check alternative GPT in
+	 * the last 512 byte block of the device.
+	 */
+
+	ALLOC_CACHE_ALIGN_BUFFER_PAD(gpt_header, gpt_head, 1, dev_desc->blksz);
+	gpt_entry *gpt_pte = NULL;
+
+	if (is_gpt_valid(dev_desc, (dev_desc->lba - 1),
+			 gpt_head, &gpt_pte) != 1) {
+		free(gpt_pte);
 		return -1;
 	}
+
+	/* Remember to free pte */
+	free(gpt_pte);
 	return 0;
 }
 
@@ -963,6 +983,10 @@ static int is_gpt_valid(struct blk_desc *dev_desc, u64 lba,
 		return 2;
 	}
 
+	/* If backup gpt is validated header check will fail, skip that. */
+	if (lba == (dev_desc->lba - 1))
+		return 0;
+
 	if (validate_gpt_header(pgpt_head, (lbaint_t)lba, dev_desc->lba))
 		return 0;
 
@@ -1006,24 +1030,14 @@ static int is_gpt_valid(struct blk_desc *dev_desc, u64 lba,
 static int find_valid_gpt(struct blk_desc *dev_desc, gpt_header *gpt_head,
 			  gpt_entry **pgpt_pte)
 {
-	int r;
-
-	r = is_gpt_valid(dev_desc, GPT_PRIMARY_PARTITION_TABLE_LBA, gpt_head,
-			 pgpt_pte);
-
-	if (r != 1) {
-		if (r != 2)
-			printf("%s: *** ERROR: Invalid GPT ***\n", __func__);
-
+	if (is_gpt_valid(dev_desc, GPT_PRIMARY_PARTITION_TABLE_LBA, gpt_head,
+			 pgpt_pte) != 1) {
 		if (is_gpt_valid(dev_desc, (dev_desc->lba - 1), gpt_head,
 				 pgpt_pte) != 1) {
 			printf("%s: *** ERROR: Invalid Backup GPT ***\n",
 			       __func__);
 			return 0;
 		}
-		if (r != 2)
-			printf("%s: ***        Using Backup GPT ***\n",
-			       __func__);
 	}
 	return 1;
 }
