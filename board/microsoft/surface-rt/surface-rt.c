@@ -39,6 +39,77 @@ void pinmux_init(void)
  * Do I2C/PMU writes to bring up SD card bus power
  *
  */
+ void gpio_early_init_uart(void)
+{
+	gpio_request(TEGRA_GPIO(X, 6), "Force OFF# X13");
+	gpio_direction_output(TEGRA_GPIO(X, 6), 1);
+	gpio_request(TEGRA_GPIO(X, 7), "Force OFF# X14");
+	gpio_direction_output(TEGRA_GPIO(X, 7), 1);
+}
+
+/*
+ * Enable AX88772B USB to LAN controller
+ */
+void pin_mux_usb(void)
+
+
+
+{
+
+	gpio_request(TEGRA_GPIO(D, 4), "MRVL-SD8797_Wifi_Enable");
+	gpio_direction_output(TEGRA_GPIO(D, 4), 0);
+	udelay(5);
+	gpio_set_value(TEGRA_GPIO(D, 4), 1);
+	printf("Enabled MRVL-SD8797 WiFi GPIO D4\n");
+	
+	gpio_request(TEGRA_GPIO(D, 1), "MRVL-SD8797_BT_Enable");
+	gpio_direction_output(TEGRA_GPIO(D, 1), 0);
+	udelay(5);
+	gpio_set_value(TEGRA_GPIO(D, 1), 1);
+	printf("Enabled MRVL-SD8797 BT GPIO D1\n");
+	
+        puts("Display Panel Regulator enabled\n");
+	gpio_request(TEGRA_GPIO(B, 2), "panel_&_EC_enabled");
+	gpio_direction_output(TEGRA_GPIO(B, 2), 0);
+	udelay(5);
+	gpio_set_value(TEGRA_GPIO(B, 2), 1);	
+	 puts("Display Panel & EC enabled\n");
+	
+	
+	gpio_request(TEGRA_GPIO(DD, 0), "backlight_enable");
+	gpio_direction_output(TEGRA_GPIO(DD, 0), 0);
+	udelay(5);
+	gpio_set_value(TEGRA_GPIO(DD, 0), 1);
+	 puts("Backlight enabled\n");
+	 
+	gpio_request(TEGRA_GPIO(DD, 2), "panel_regulator_enable");
+	gpio_direction_output(TEGRA_GPIO(DD, 2), 0);
+	udelay(5);
+	gpio_set_value(TEGRA_GPIO(DD, 2), 1);
+	 puts("panel_regulator_enable\n");
+
+	gpio_request(TEGRA_GPIO(DD, 6), "usb1_regulator_enable");
+	gpio_direction_output(TEGRA_GPIO(DD, 6), 0);
+	udelay(5);
+	gpio_set_value(TEGRA_GPIO(DD, 6), 1);
+	 puts("usb1_regulator_enable\n");
+	
+	gpio_request(TEGRA_GPIO(N, 7), "host1x_enable");
+	gpio_direction_output(TEGRA_GPIO(N, 7), 0);
+	udelay(5);
+	gpio_set_value(TEGRA_GPIO(N, 7), 0);
+	 puts("host1x enable\n");
+}
+
+/*
+ * Backlight off before OS handover
+ */
+void board_preboot_os(void)
+{
+	gpio_request(TEGRA_GPIO(V, 2), "BL_ON");
+	gpio_direction_output(TEGRA_GPIO(V, 2), 0);
+}
+ 
 void board_sdmmc_voltage_init(void)
 {
 	struct udevice *dev;
